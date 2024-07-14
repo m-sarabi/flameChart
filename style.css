@@ -1,22 +1,12 @@
 g.candle {
     stroke-width: 1px;
     transform-origin: center;
-    transition: transform 1s ease-in-out;
+    transition: transform 300ms ease-in-out;
     cursor: pointer;
 }
 
-rect.bull {
-    fill: lightgreen;
-    stroke: darkgreen;
-}
-
-rect.bear {
-    fill: lightcoral;
-    stroke: darkred;
-}
-
 line {
-    transition: all 1s ease-in-out;
+    transition: all 300ms ease-in-out;
 }
 
 .scale-up line {
@@ -24,7 +14,7 @@ line {
 }
 
 rect {
-    transition: all 1s ease-in-out;
+    transition: all 300ms ease-in-out;
 }
 
 .scale-up rect {
@@ -33,15 +23,7 @@ rect {
 
 .scale-up {
     transform: scale(1.1);
-    transition: all 1s ease-in-out;
-}
-
-.shadow.bull {
-    stroke: darkgreen;
-}
-
-.shadow.bear {
-    stroke: darkred;
+    transition: all 300ms ease-in-out;
 }
 
 #chart-container {
@@ -64,4 +46,38 @@ rect {
     border: 1px solid black;
     resize: both;
     overflow: hidden;
+}
+
+#chart-settings {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 250px;
+    background-color: #f1f1f1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#chart-settings .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border-color: transparent;
+    cursor: pointer;
+    border-radius: 5px;
+    appearance: none;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border-color: transparent;
+    border-radius: 5px;
 }

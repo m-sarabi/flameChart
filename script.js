@@ -1,5 +1,13 @@
 const WIDTH_SCALE = 0.75;
 const MIN_SPACING = 24;
+const colors = {
+    bullBody: 'lightgreen',
+    bearBody: 'lightcoral',
+    bullBorder: 'darkgreen',
+    bearBorder: 'darkred',
+    bullShadow: 'darkgreen',
+    bearShadow: 'darkred'
+};
 
 class Candle {
     constructor(index, ohlc, range) {
@@ -29,12 +37,15 @@ class Candle {
         };
     }
 
-    createRect(x, y, width, height) {
+    createRect(x, y, width, height, className) {
         const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         rect.setAttributeNS(null, 'x', x);
         rect.setAttributeNS(null, 'y', y);
         rect.setAttributeNS(null, 'width', width);
         rect.setAttributeNS(null, 'height', height);
+        rect.setAttributeNS(null, 'fill', this.greenCandle ? colors.bullBody : colors.bearBody);
+        rect.setAttributeNS(null, 'stroke', this.greenCandle ? colors.bullBorder : colors.bearBorder);
+        rect.classList.add(className);
 
         return rect;
     }
@@ -45,7 +56,7 @@ class Candle {
         line.setAttributeNS(null, 'y1', y1);
         line.setAttributeNS(null, 'x2', x2);
         line.setAttributeNS(null, 'y2', y2);
-        line.setAttributeNS(null, 'stroke', 'black');
+        line.setAttributeNS(null, 'stroke', this.greenCandle ? colors.bullShadow : colors.bearShadow);
         line.setAttributeNS(null, 'stroke-width', '2');
 
         return line;
@@ -58,14 +69,7 @@ class Candle {
         let y = (this.range.highestHigh - this.high) * this.scale;
 
         // body of the candle as a rectangle svg element
-        this.bodyElement = this.createRect(x, y + sizes.upperShadowSize, sizes.width, sizes.bodySize);
-
-        // add class to the body
-        if (this.greenCandle) {
-            this.bodyElement.classList.add('bull');
-        } else {
-            this.bodyElement.classList.add('bear');
-        }
+        this.bodyElement = this.createRect(x, y + sizes.upperShadowSize, sizes.width, sizes.bodySize, this.greenCandle ? 'bull' : 'bear');
 
         // upper shadow of the candle as a line svg element
         this.upperShadowElement = this.createLine(x + sizes.width / 2, y, x + sizes.width / 2, y + sizes.upperShadowSize);
@@ -135,6 +139,18 @@ class VerticalLines {
 function drawCandles(container, ohlcData) {
     let lowestLow = Math.min(...ohlcData.low);
     let highestHigh = Math.max(...ohlcData.high);
+    const bullColorInput = document.getElementById('bull-color-body');
+    const bearColorInput = document.getElementById('bear-color-body');
+    const bullBorderColorInput = document.getElementById('bull-color-border');
+    const bearBorderColorInput = document.getElementById('bear-color-border');
+    const bullShadowColorInput = document.getElementById('bull-color-shadow');
+    const bearShadowColorInput = document.getElementById('bear-color-shadow');
+    colors.bullBody = bullColorInput.value;
+    colors.bearBody = bearColorInput.value;
+    colors.bullBorder = bullBorderColorInput.value;
+    colors.bearBorder = bearBorderColorInput.value;
+    colors.bullShadow = bullShadowColorInput.value;
+    colors.bearShadow = bearShadowColorInput.value;
 
     let range = {
         highestHigh: highestHigh,
@@ -169,6 +185,51 @@ function drawCandles(container, ohlcData) {
         let candle = new Candle(i, ohlc, range);
         svg.appendChild(candle.createCandle());
     }
+
+    bullColorInput.addEventListener('input', () => {
+        const bullCandles = document.querySelectorAll('rect.bull');
+        colors.bullBody = bullColorInput.value;
+        bullCandles.forEach(candle => {
+            candle.style.fill = colors.bullBody;
+        });
+    });
+    bearColorInput.addEventListener('input', () => {
+        const bearCandles = document.querySelectorAll('rect.bear');
+        colors.bearBody = bearColorInput.value;
+        bearCandles.forEach(candle => {
+            candle.style.fill = colors.bearBody;
+        });
+    });
+
+    bullBorderColorInput.addEventListener('input', () => {
+        const bullCandles = document.querySelectorAll('rect.bull');
+        colors.bullBorder = bullBorderColorInput.value;
+        bullCandles.forEach(candle => {
+            candle.style.stroke = colors.bullBorder;
+        });
+    });
+    bearBorderColorInput.addEventListener('input', () => {
+        const bearCandles = document.querySelectorAll('rect.bear');
+        colors.bearBorder = bearBorderColorInput.value;
+        bearCandles.forEach(candle => {
+            candle.style.stroke = colors.bearBorder;
+        });
+    });
+
+    bullShadowColorInput.addEventListener('input', () => {
+        const shadows = document.querySelectorAll('.shadow.bull');
+        colors.bullShadow = bullShadowColorInput.value;
+        shadows.forEach(shadow => {
+            shadow.style.stroke = colors.bullShadow;
+        });
+    });
+    bearShadowColorInput.addEventListener('input', () => {
+        const shadows = document.querySelectorAll('.shadow.bear');
+        colors.bearShadow = bearShadowColorInput.value;
+        shadows.forEach(shadow => {
+            shadow.style.stroke = colors.bearShadow;
+        });
+    });
 
     container.appendChild(svg);
 }
