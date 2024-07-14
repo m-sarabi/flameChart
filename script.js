@@ -167,19 +167,29 @@ function drawCandles(container, ohlcData) {
     container.appendChild(svg);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const ohlcData = {
-        'date': [1, 2, 3, 4, 5, 6],
-        'open': [2.7, 2, 3.5, 6.2, 5, 4],
-        'high': [3.2, 4.9, 7, 6.5, 5.6, 5.3],
-        'low': [1, 2, 2.8, 3.6, 3.4, 3.9],
-        'close': [1.6, 4, 6, 4.9, 3.5, 4.2]
-    };
+async function fetchData() {
+    const response = await fetch('data.json');
+    const data = await response.json();
+    console.log(data);
+    return data;
+}
 
+document.addEventListener('DOMContentLoaded', function () {
     let container = document.getElementById('chart');
 
-    drawCandles(container, ohlcData);
+    // const ohlcData = {
+    //     'date': [1, 2, 3, 4, 5, 6],
+    //     'open': [2.7, 2, 3.5, 6.2, 5, 4],
+    //     'high': [3.2, 4.9, 7, 6.5, 5.6, 5.3],
+    //     'low': [1, 2, 2.8, 3.6, 3.4, 3.9],
+    //     'close': [1.6, 4, 6, 4.9, 3.5, 4.2]
+    // };
 
+    let ohlcData;
+    fetchData().then((data) => {
+        drawCandles(container, data);
+        ohlcData = data;
+    });
     window.addEventListener('resize', function () {
         drawCandles(container, ohlcData);
     });
