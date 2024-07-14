@@ -14,35 +14,51 @@ class Candle {
         this.scale = this.range.containerHeight / (this.range.highestHigh - this.range.lowestLow);
 
         this.candleGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.candleGroup.classList.add('candle');
+    }
+
+    calculateSizes() {
+        let rawWidth = this.range.containerWidth / this.range.length;
+        return {
+            bodySize: Math.abs(this.open - this.close) * this.scale,
+            candle_size: (this.high - this.low) * this.scale,
+            upperShadowSize: (this.open > this.close ? this.high - this.open : this.high - this.close) * this.scale,
+            lowerShadowSize: (this.open > this.close ? this.close - this.low : this.open - this.low) * this.scale,
+            rawWidth: rawWidth,
+            width: rawWidth * WIDTH_SCALE
+        };
+    }
+
+    createRect(x, y, width, height) {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttributeNS(null, 'x', x);
+        rect.setAttributeNS(null, 'y', y);
+        rect.setAttributeNS(null, 'width', width);
+        rect.setAttributeNS(null, 'height', height);
+
+        return rect;
+    }
+
+    createLine(x1, y1, x2, y2) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttributeNS(null, 'x1', x1);
+        line.setAttributeNS(null, 'y1', y1);
+        line.setAttributeNS(null, 'x2', x2);
+        line.setAttributeNS(null, 'y2', y2);
+        line.setAttributeNS(null, 'stroke', 'black');
+        line.setAttributeNS(null, 'stroke-width', '2');
+
+        return line;
     }
 
     // body of the candle as a rectangle svg element
-    body() {
-
-        const sizes = {
-            bodySize: Math.abs(this.open - this.close),
-            candle_size: this.high - this.low,
-            upperShadowSize: this.open > this.close ? this.high - this.open : this.high - this.close,
-            lowerShadowSize: this.open > this.close ? this.close - this.low : this.open - this.low,
-        };
-
-        // temp properties
-        let rawWidth = this.range.containerWidth / this.range.length;
-        let width = rawWidth * WIDTH_SCALE;
-        let x = this.index * rawWidth + (rawWidth - width) / 2;
+    createCandle() {
+        const sizes = this.calculateSizes();
+        let x = this.index * sizes.rawWidth + (sizes.rawWidth - sizes.width) / 2;
         let y = (this.range.highestHigh - this.high) * this.scale;
 
-        for (let s in sizes) {
-            sizes[s] = sizes[s] * this.scale;
-        }
-
         // body of the candle as a rectangle svg element
-        this.bodyElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-
-        this.bodyElement.setAttributeNS(null, 'x', x.toString());
-        this.bodyElement.setAttributeNS(null, 'y', (y + sizes.upperShadowSize).toString());
-        this.bodyElement.setAttributeNS(null, 'width', width.toString());
-        this.bodyElement.setAttributeNS(null, 'height', sizes.bodySize.toString());
+        this.bodyElement = this.createRect(x, y + sizes.upperShadowSize, sizes.width, sizes.bodySize);
 
         // add class to the body
         if (this.greenCandle) {
@@ -50,45 +66,22 @@ class Candle {
         } else {
             this.bodyElement.classList.add('bear');
         }
-        this.candleGroup.classList.add('candle');
 
         // upper shadow of the candle as a line svg element
-        this.upperShadowElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-
-        this.upperShadowElement.setAttributeNS(null, 'x1', (x + width / 2).toString());
-        this.upperShadowElement.setAttributeNS(null, 'y1', y.toString());
-        this.upperShadowElement.setAttributeNS(null, 'x2', (x + width / 2).toString());
-        this.upperShadowElement.setAttributeNS(null, 'y2', (y + sizes.upperShadowSize).toString());
-        this.upperShadowElement.setAttributeNS(null, 'stroke', 'black');
-        this.upperShadowElement.setAttributeNS(null, 'stroke-width', '2');
+        this.upperShadowElement = this.createLine(x + sizes.width / 2, y, x + sizes.width / 2, y + sizes.upperShadowSize);
+        this.upperShadowElement.classList.add('shadow', this.greenCandle ? 'bull' : 'bear');
 
 
         // lower shadow of the candle as a line svg element
-        this.lowerShadowElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-
-        this.lowerShadowElement.setAttributeNS(null, 'x1', (x + width / 2).toString());
-        this.lowerShadowElement.setAttributeNS(null, 'y1', (y + sizes.upperShadowSize + sizes.bodySize).toString());
-        this.lowerShadowElement.setAttributeNS(null, 'x2', (x + width / 2).toString());
-        this.lowerShadowElement.setAttributeNS(null, 'y2', (y + sizes.bodySize + sizes.lowerShadowSize + sizes.upperShadowSize).toString());
-        this.lowerShadowElement.setAttributeNS(null, 'stroke', 'black');
-        this.lowerShadowElement.setAttributeNS(null, 'stroke-width', '2');
-
-        // add class to shadows
-        for (let shadow of [this.upperShadowElement, this.lowerShadowElement]) {
-            if (this.greenCandle) {
-                shadow.classList.add('bull');
-            } else {
-                shadow.classList.add('bear');
-            }
-            shadow.classList.add('shadow');
-        }
+        this.lowerShadowElement = this.createLine(x + sizes.width / 2, y + sizes.bodySize + sizes.upperShadowSize, x + sizes.width / 2, y + sizes.bodySize + sizes.lowerShadowSize + sizes.upperShadowSize);
+        this.lowerShadowElement.classList.add('shadow', this.greenCandle ? 'bull' : 'bear');
 
         // add event listener
         this.candleGroup.addEventListener('click', this.onClick.bind(this));
 
         // Set transform-origin dynamically
-        // find a better solution so that candles don't go off screen
-        this.candleGroup.style.transformOrigin = `${width / 2 + x}px ${y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
+        // find a better solution so that candles don't go off-screen
+        this.candleGroup.style.transformOrigin = `${sizes.width / 2 + x}px ${y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
 
         this.candleGroup.appendChild(this.bodyElement);
         this.candleGroup.appendChild(this.upperShadowElement);
@@ -97,7 +90,7 @@ class Candle {
     }
 
     onClick() {
-        console.log('clicked');
+        console.log('Candle clicked');
         this.candleGroup.classList.toggle('scale-up');
     }
 }
@@ -106,28 +99,33 @@ class VerticalLines {
     constructor(range, minSpacing = MIN_SPACING) {
         this.range = range;
         this.minSpacing = minSpacing;
-
-        this.spacing = 1;
         this.verticalGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     }
 
+    createLine(x, y) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttributeNS(null, 'x1', x);
+        line.setAttributeNS(null, 'y1', '0');
+        line.setAttributeNS(null, 'x2', x);
+        line.setAttributeNS(null, 'y2', y);
+        line.setAttributeNS(null, 'stroke', 'black');
+        line.setAttributeNS(null, 'opacity', '0.3');
+
+        return line;
+    }
+
     lines() {
+        let spacing = 1;
         let rawWidth = this.range.containerWidth / this.range.length;
-        while (rawWidth * this.spacing < this.minSpacing) {
-            this.spacing++;
+        while (rawWidth * spacing < this.minSpacing) {
+            spacing++;
         }
         let x = rawWidth / 2;
         let y = this.range.containerHeight;
         while (x < this.range.containerWidth) {
-            let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttributeNS(null, 'x1', x.toString());
-            line.setAttributeNS(null, 'y1', '0');
-            line.setAttributeNS(null, 'x2', x.toString());
-            line.setAttributeNS(null, 'y2', y.toString());
-            line.setAttributeNS(null, 'stroke', 'black');
-            line.setAttributeNS(null, 'opacity', '0.3');
+            let line = this.createLine(x, y);
             this.verticalGroup.appendChild(line);
-            x += rawWidth * this.spacing;
+            x += rawWidth * spacing;
         }
 
         return this.verticalGroup;
@@ -142,14 +140,12 @@ function drawCandles(container, ohlcData) {
         highestHigh: highestHigh,
         lowestLow: lowestLow,
         length: ohlcData.date.length,
+        containerHeight: parseInt(window.getComputedStyle(container).height),
+        containerWidth: parseInt(window.getComputedStyle(container).width)
     };
-    let containerStyle = window.getComputedStyle(container);
-    range['containerHeight'] = parseInt(containerStyle.height);
-    range['containerWidth'] = parseInt(containerStyle.width);
 
-    while (container.firstChild) {
-        container.removeChild(container.firstChild);
-    }
+    container.innerHTML = '';
+
     let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     // set the width and height of the svg element
     svg.setAttributeNS(null, 'width', '100%');
@@ -167,7 +163,7 @@ function drawCandles(container, ohlcData) {
             'close': ohlcData['close'][i]
         };
         let candle = new Candle(i, ohlc, range);
-        svg.appendChild(candle.body());
+        svg.appendChild(candle.createCandle());
     }
 
     container.appendChild(svg);
@@ -186,8 +182,8 @@ async function fetchData() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    let container = document.getElementById('chart');
+document.addEventListener('DOMContentLoaded', async function () {
+    const container = document.getElementById('chart');
 
     // const ohlcData = {
     //     'date': [1, 2, 3, 4, 5, 6],
@@ -197,12 +193,14 @@ document.addEventListener('DOMContentLoaded', function () {
     //     'close': [1.6, 4, 6, 4.9, 3.5, 4.2]
     // };
 
-    let ohlcData;
-    fetchData().then((data) => {
-        drawCandles(container, data);
-        ohlcData = data;
-    });
-    window.addEventListener('resize', function () {
+    try {
+        const ohlcData = await fetchData();
         drawCandles(container, ohlcData);
-    });
+
+        window.addEventListener('resize', function () {
+            drawCandles(container, ohlcData);
+        });
+    } catch (error) {
+        console.error("Failed to draw the chart:", error);
+    }
 });
