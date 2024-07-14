@@ -139,23 +139,11 @@ class VerticalLines {
 function drawCandles(container, ohlcData) {
     let lowestLow = Math.min(...ohlcData.low);
     let highestHigh = Math.max(...ohlcData.high);
-    const bullColorInput = document.getElementById('bull-color-body');
-    const bearColorInput = document.getElementById('bear-color-body');
-    const bullBorderColorInput = document.getElementById('bull-color-border');
-    const bearBorderColorInput = document.getElementById('bear-color-border');
-    const bullShadowColorInput = document.getElementById('bull-color-shadow');
-    const bearShadowColorInput = document.getElementById('bear-color-shadow');
-    colors.bullBody = bullColorInput.value;
-    colors.bearBody = bearColorInput.value;
-    colors.bullBorder = bullBorderColorInput.value;
-    colors.bearBorder = bearBorderColorInput.value;
-    colors.bullShadow = bullShadowColorInput.value;
-    colors.bearShadow = bearShadowColorInput.value;
 
     let range = {
         highestHigh: highestHigh,
         lowestLow: lowestLow,
-        length: ohlcData.date.length,
+        length: ohlcData['date'].length,
         containerHeight: parseInt(window.getComputedStyle(container).height),
         containerWidth: parseInt(window.getComputedStyle(container).width)
     };
