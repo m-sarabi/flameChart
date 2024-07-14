@@ -185,14 +185,6 @@ async function fetchData() {
 document.addEventListener('DOMContentLoaded', async function () {
     const container = document.getElementById('chart');
 
-    // const ohlcData = {
-    //     'date': [1, 2, 3, 4, 5, 6],
-    //     'open': [2.7, 2, 3.5, 6.2, 5, 4],
-    //     'high': [3.2, 4.9, 7, 6.5, 5.6, 5.3],
-    //     'low': [1, 2, 2.8, 3.6, 3.4, 3.9],
-    //     'close': [1.6, 4, 6, 4.9, 3.5, 4.2]
-    // };
-
     try {
         const ohlcData = await fetchData();
         drawCandles(container, ohlcData);
@@ -200,6 +192,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         window.addEventListener('resize', function () {
             drawCandles(container, ohlcData);
         });
+
+        new ResizeObserver(() => {
+            drawCandles(container, ohlcData);
+        }).observe(container);
     } catch (error) {
         console.error("Failed to draw the chart:", error);
     }
