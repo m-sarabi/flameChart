@@ -188,9 +188,13 @@ async function fetchData() {
 
 document.addEventListener('DOMContentLoaded', async function () {
     const container = document.getElementById('chart');
+    const title = document.getElementById('chart-title');
 
     try {
         const ohlcData = await fetchData();
+
+        title.textContent = ohlcData.title;
+
         drawCandles(container, ohlcData);
 
         window.addEventListener('resize', function () {

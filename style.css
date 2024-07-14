@@ -44,10 +44,24 @@ rect {
     stroke: darkred;
 }
 
+#chart-container {
+    text-align: center;
+    margin: 20px auto;
+}
+
+
+#chart-title {
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
 #chart {
-    height: 500px;
+    height: 400px;
     width: 50%;
     margin: 0 auto;
     padding: 10px;
     border: 1px solid black;
+    resize: both;
+    overflow: hidden;
 }
