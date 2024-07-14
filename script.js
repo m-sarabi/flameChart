@@ -186,51 +186,6 @@ function drawCandles(container, ohlcData) {
         svg.appendChild(candle.createCandle());
     }
 
-    bullColorInput.addEventListener('input', () => {
-        const bullCandles = document.querySelectorAll('rect.bull');
-        colors.bullBody = bullColorInput.value;
-        bullCandles.forEach(candle => {
-            candle.style.fill = colors.bullBody;
-        });
-    });
-    bearColorInput.addEventListener('input', () => {
-        const bearCandles = document.querySelectorAll('rect.bear');
-        colors.bearBody = bearColorInput.value;
-        bearCandles.forEach(candle => {
-            candle.style.fill = colors.bearBody;
-        });
-    });
-
-    bullBorderColorInput.addEventListener('input', () => {
-        const bullCandles = document.querySelectorAll('rect.bull');
-        colors.bullBorder = bullBorderColorInput.value;
-        bullCandles.forEach(candle => {
-            candle.style.stroke = colors.bullBorder;
-        });
-    });
-    bearBorderColorInput.addEventListener('input', () => {
-        const bearCandles = document.querySelectorAll('rect.bear');
-        colors.bearBorder = bearBorderColorInput.value;
-        bearCandles.forEach(candle => {
-            candle.style.stroke = colors.bearBorder;
-        });
-    });
-
-    bullShadowColorInput.addEventListener('input', () => {
-        const shadows = document.querySelectorAll('.shadow.bull');
-        colors.bullShadow = bullShadowColorInput.value;
-        shadows.forEach(shadow => {
-            shadow.style.stroke = colors.bullShadow;
-        });
-    });
-    bearShadowColorInput.addEventListener('input', () => {
-        const shadows = document.querySelectorAll('.shadow.bear');
-        colors.bearShadow = bearShadowColorInput.value;
-        shadows.forEach(shadow => {
-            shadow.style.stroke = colors.bearShadow;
-        });
-    });
-
     container.appendChild(svg);
 }
 
