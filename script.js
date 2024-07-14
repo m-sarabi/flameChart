@@ -168,10 +168,16 @@ function drawCandles(container, ohlcData) {
 }
 
 async function fetchData() {
-    const response = await fetch('data.json');
-    const data = await response.json();
-    console.log(data);
-    return data;
+    try {
+        const response = await fetch('data.json');
+        if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to fetch data:", error);
+        throw error;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
