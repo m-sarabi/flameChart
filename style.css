@@ -2,6 +2,7 @@ g.candle {
     stroke-width: 1px;
     transform-origin: center;
     transition: transform 1s ease-in-out;
+    cursor: pointer;
 }
 
 rect.bull {
@@ -35,7 +36,15 @@ rect {
     transition: all 1s ease-in-out;
 }
 
-#test {
+.shadow.bull {
+    stroke: darkgreen;
+}
+
+.shadow.bear {
+    stroke: darkred;
+}
+
+#chart {
     height: 500px;
     width: 50%;
     margin: 0 auto;
