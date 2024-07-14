@@ -1,16 +1,15 @@
 const WIDTH_SCALE = 0.75;
+const MIN_SPACING = 24;
 
 class Candle {
-    constructor(index, open, high, low, close, range, x, y) {
+    constructor(index, ohlc, range) {
         this.index = index;
-        this.open = open;
-        this.high = high;
-        this.low = low;
-        this.close = close;
+        this.open = ohlc.open;
+        this.high = ohlc.high;
+        this.low = ohlc.low;
+        this.close = ohlc.close;
         this.range = range;
-        this.x = x;
-        this.y = y;
-        this.greenCandle = open > close;
+        this.greenCandle = this.open > this.close;
 
         this.scale = this.range.containerHeight / (this.range.highestHigh - this.range.lowestLow);
 
@@ -88,6 +87,7 @@ class Candle {
         this.candleGroup.addEventListener('click', this.onClick.bind(this));
 
         // Set transform-origin dynamically
+        // find a better solution so that candles don't go off screen
         this.candleGroup.style.transformOrigin = `${width / 2 + x}px ${y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
 
         this.candleGroup.appendChild(this.bodyElement);
@@ -103,7 +103,7 @@ class Candle {
 }
 
 class VerticalLines {
-    constructor(range, minSpacing = 20) {
+    constructor(range, minSpacing = MIN_SPACING) {
         this.range = range;
         this.minSpacing = minSpacing;
 
@@ -159,8 +159,14 @@ function drawCandles(container, ohlcData) {
     let verticalLines = new VerticalLines(range);
     svg.appendChild(verticalLines.lines());
 
-    for (let i = 0; i < ohlcData.date.length; i++) {
-        let candle = new Candle(i, ohlcData.open[i], ohlcData.high[i], ohlcData.low[i], ohlcData.close[i], range);
+    for (let i = 0; i < ohlcData['date'].length; i++) {
+        const ohlc = {
+            'open': ohlcData['open'][i],
+            'high': ohlcData['high'][i],
+            'low': ohlcData['low'][i],
+            'close': ohlcData['close'][i]
+        };
+        let candle = new Candle(i, ohlc, range);
         svg.appendChild(candle.body());
     }
 
