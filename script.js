@@ -144,6 +144,10 @@ function drawCandles(container, ohlcData) {
         containerWidth: parseInt(window.getComputedStyle(container).width)
     };
 
+    if (range.containerWidth === 0 || range.containerHeight === 0) {
+        throw new Error("Can't draw the chart in the container with zero width or height, silly!");
+    }
+
     container.innerHTML = '';
 
     let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
