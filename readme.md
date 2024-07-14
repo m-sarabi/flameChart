@@ -1,4 +1,4 @@
-# Candle Chart Visualization
+# FlameChart
 
 Visualize OHLC (Open, High, Low, Close) data as a responsive candlestick chart using SVG elements.
 
