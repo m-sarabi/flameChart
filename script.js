@@ -25,8 +25,9 @@ class candle {
         };
 
         // temp properties
-        let width = 20;
-        let x = (this.index + 1) * width * 2;
+        let rawWidth = this.range.containerWidth / this.range.length;
+        let width = rawWidth * 0.75;
+        let x = this.index * rawWidth + (rawWidth - width) / 2;
         let y = (this.range.highestHigh - this.high) * this.scale;
 
         for (let s in sizes) {
@@ -72,7 +73,7 @@ class candle {
         this.candleGroup.addEventListener('click', this.onClick.bind(this));
 
         // Set transform-origin dynamically
-        this.candleGroup.style.transformOrigin = `${width / 2 + x}px ${sizes.bodySize / 2 + y}px`;
+        this.candleGroup.style.transformOrigin = `${width / 2 + x}px ${y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
 
         this.candleGroup.appendChild(this.bodyElement);
         this.candleGroup.appendChild(this.upperShadowElement);
@@ -88,11 +89,11 @@ class candle {
 
 document.addEventListener('DOMContentLoaded', function () {
     const ohlcData = {
-        'date': [1, 2, 3, 4, 5],
-        'open': [2.7, 2, 3.5, 6.2, 5],
-        'high': [3.2, 4.9, 7, 6.5, 5.6],
-        'low': [1, 2, 2.8, 3.6, 3.4],
-        'close': [1.6, 4, 6, 4.9, 3.5]
+        'date': [1, 2, 3, 4, 5, 6],
+        'open': [2.7, 2, 3.5, 6.2, 5, 4],
+        'high': [3.2, 4.9, 7, 6.5, 5.6, 5.3],
+        'low': [1, 2, 2.8, 3.6, 3.4, 3.9],
+        'close': [1.6, 4, 6, 4.9, 3.5, 4.2]
     };
 
     let lowestLow = Math.min(...ohlcData.low);
@@ -100,13 +101,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let range = {
         highestHigh: highestHigh,
-        lowestLow: lowestLow
+        lowestLow: lowestLow,
+        length: ohlcData.date.length,
     };
 
     let container = document.getElementById('test');
+    let containerStyle = window.getComputedStyle(container);
 
-    range['containerHeight'] = container.offsetHeight;
-    range['containerWidth'] = container.offsetWidth;
+    range['containerHeight'] = parseInt(containerStyle.height);
+    range['containerWidth'] = parseInt(containerStyle.width);
+    console.log(range.containerHeight, range.containerWidth);
 
     let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
