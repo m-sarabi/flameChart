@@ -29,6 +29,10 @@ rect {
 #chart-container {
     text-align: center;
     margin: 20px auto;
+    position: relative;
+    padding: 36px;
+    border: 1px solid black;
+    display: inline-block;
 }
 
 
@@ -40,44 +44,28 @@ rect {
 
 #chart {
     height: 400px;
-    width: 50%;
+    width: 800px;
     margin: 0 auto;
     padding: 10px;
-    border: 1px solid black;
+    border: 1px solid #ccc;
     resize: both;
     overflow: hidden;
 }
 
-#chart-settings {
+#x-axis-label, #y-axis-label {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
     position: absolute;
-    top: 0;
+}
+
+#x-axis-label {
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#y-axis-label {
     left: 0;
-    z-index: 1;
-    width: 250px;
-    background-color: #f1f1f1;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-#chart-settings .setting-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-input[type="color"] {
-    width: 40px;
-    height: 30px;
-    border-color: transparent;
-    cursor: pointer;
-    border-radius: 5px;
-    appearance: none;
-}
-
-input[type="color"]::-webkit-color-swatch {
-    border-color: transparent;
-    border-radius: 5px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
 }

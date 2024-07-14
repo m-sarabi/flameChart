@@ -9,6 +9,8 @@ const colors = {
     bearShadow: 'darkred'
 };
 
+let container;
+
 class Candle {
     constructor(index, ohlc, range) {
         this.index = index;
@@ -37,7 +39,7 @@ class Candle {
         };
     }
 
-    createRect(x, y, width, height, className) {
+    createBody(x, y, width, height, className) {
         const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         rect.setAttributeNS(null, 'x', x);
         rect.setAttributeNS(null, 'y', y);
@@ -69,7 +71,7 @@ class Candle {
         let y = (this.range.highestHigh - this.high) * this.scale;
 
         // body of the candle as a rectangle svg element
-        this.bodyElement = this.createRect(x, y + sizes.upperShadowSize, sizes.width, sizes.bodySize, this.greenCandle ? 'bull' : 'bear');
+        this.bodyElement = this.createBody(x, y + sizes.upperShadowSize, sizes.width, sizes.bodySize, this.greenCandle ? 'bull' : 'bear');
 
         // upper shadow of the candle as a line svg element
         this.upperShadowElement = this.createLine(x + sizes.width / 2, y, x + sizes.width / 2, y + sizes.upperShadowSize);
@@ -191,7 +193,7 @@ async function fetchData() {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    const container = document.getElementById('chart');
+    container = document.getElementById('chart');
     const title = document.getElementById('chart-title');
 
     try {
