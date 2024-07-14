@@ -1,0 +1,42 @@
+g.candle {
+    stroke-width: 1px;
+    transform-origin: center;
+    transition: transform 1s ease-in-out;
+}
+
+rect.bull {
+    fill: lightgreen;
+    stroke: darkgreen;
+}
+
+rect.bear {
+    fill: lightcoral;
+    stroke: darkred;
+}
+
+line {
+    transition: all 1s ease-in-out;
+}
+
+.scale-up line {
+    stroke-width: 2px;
+}
+
+rect {
+    transition: all 1s ease-in-out;
+}
+
+.scale-up rect {
+    stroke-width: 2px;
+}
+
+.scale-up {
+    transform: scale(1.1);
+    transition: all 1s ease-in-out;
+}
+
+#test {
+    height: 500px;
+    width: 50%;
+    margin: 0 auto;
+}
