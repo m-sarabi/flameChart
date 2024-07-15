@@ -222,52 +222,12 @@ rect {
     transition: all 300ms ease-in-out;
 }
 
-#flame-chart {
-    text-align: center;
-    margin: 20px auto;
-    position: relative;
-    padding: 36px;
-    border: 1px solid black;
-    display: flex;
-    width:800px;
-    height:400px;
-    flex-direction: column;
-    resize: both;
-    overflow: hidden;
-}
-
-
-#chart-title {
-    font-family: Arial, sans-serif;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
 #chart {
     width: 100%;
-    margin: 0 auto;
     padding: 10px;
     border: 1px solid #ccc;
     flex-grow: 1;
     min-height: 0;
-}
-
-#x-axis-label, #y-axis-label {
-    font-family: Arial, sans-serif;
-    font-size: 18px;
-    position: absolute;
-}
-
-#x-axis-label {
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-#y-axis-label {
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
 }
     `;
     document.head.appendChild(style);
@@ -279,12 +239,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     container = document.createElement('div');
     container.id = 'chart';
     mainContainer.appendChild(container);
-    const title = document.getElementById('chart-title');
 
     try {
         const ohlcData = await fetchData();
-
-        title.textContent = ohlcData.title;
 
         drawCandles(container, ohlcData);
 

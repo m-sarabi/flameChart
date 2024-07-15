@@ -4,10 +4,8 @@
     position: relative;
     padding: 36px;
     border: 1px solid black;
-    display: flex;
     width:800px;
     height:400px;
-    flex-direction: column;
     resize: both;
     overflow: hidden;
 }
