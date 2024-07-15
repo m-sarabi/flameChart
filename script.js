@@ -35,7 +35,9 @@ class Candle {
             upperShadowSize: (this.open > this.close ? this.high - this.open : this.high - this.close) * this.scale,
             lowerShadowSize: (this.open > this.close ? this.close - this.low : this.open - this.low) * this.scale,
             rawWidth: rawWidth,
-            width: rawWidth * WIDTH_SCALE
+            width: rawWidth * WIDTH_SCALE,
+            x: rawWidth * (this.index + (1 - WIDTH_SCALE) / 2),
+            y: (this.range.highestHigh - this.high) * this.scale,
         };
     }
 
@@ -67,19 +69,17 @@ class Candle {
     // body of the candle as a rectangle svg element
     createCandle() {
         const sizes = this.calculateSizes();
-        let x = this.index * sizes.rawWidth + (sizes.rawWidth - sizes.width) / 2;
-        let y = (this.range.highestHigh - this.high) * this.scale;
 
         // body of the candle as a rectangle svg element
-        this.bodyElement = this.createBody(x, y + sizes.upperShadowSize, sizes.width, sizes.bodySize, this.greenCandle ? 'bull' : 'bear');
+        this.bodyElement = this.createBody(sizes.x, sizes.y + sizes.upperShadowSize, sizes.width, sizes.bodySize, this.greenCandle ? 'bull' : 'bear');
 
         // upper shadow of the candle as a line svg element
-        this.upperShadowElement = this.createLine(x + sizes.width / 2, y, x + sizes.width / 2, y + sizes.upperShadowSize);
+        this.upperShadowElement = this.createLine(sizes.x + sizes.width / 2, sizes.y, sizes.x + sizes.width / 2, sizes.y + sizes.upperShadowSize);
         this.upperShadowElement.classList.add('shadow', this.greenCandle ? 'bull' : 'bear');
 
 
         // lower shadow of the candle as a line svg element
-        this.lowerShadowElement = this.createLine(x + sizes.width / 2, y + sizes.bodySize + sizes.upperShadowSize, x + sizes.width / 2, y + sizes.bodySize + sizes.lowerShadowSize + sizes.upperShadowSize);
+        this.lowerShadowElement = this.createLine(sizes.x + sizes.width / 2, sizes.y + sizes.bodySize + sizes.upperShadowSize, sizes.x + sizes.width / 2, sizes.y + sizes.bodySize + sizes.lowerShadowSize + sizes.upperShadowSize);
         this.lowerShadowElement.classList.add('shadow', this.greenCandle ? 'bull' : 'bear');
 
         // add event listener
@@ -87,7 +87,7 @@ class Candle {
 
         // Set transform-origin dynamically
         // find a better solution so that candles don't go off-screen
-        this.candleGroup.style.transformOrigin = `${sizes.width / 2 + x}px ${y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
+        this.candleGroup.style.transformOrigin = `${sizes.width / 2 + sizes.x}px ${sizes.y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
 
         this.candleGroup.appendChild(this.bodyElement);
         this.candleGroup.appendChild(this.upperShadowElement);
