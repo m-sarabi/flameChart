@@ -140,13 +140,20 @@ class VerticalLines {
 function drawCandles(container, ohlcData) {
     let lowestLow = Math.min(...ohlcData.low);
     let highestHigh = Math.max(...ohlcData.high);
+    const containerStyle = window.getComputedStyle(container);
+    const paddings = {
+        top: parseInt(containerStyle.paddingTop),
+        right: parseInt(containerStyle.paddingRight),
+        bottom: parseInt(containerStyle.paddingBottom),
+        left: parseInt(containerStyle.paddingLeft)
+    }
 
     let range = {
         highestHigh: highestHigh,
         lowestLow: lowestLow,
         length: ohlcData['date'].length,
-        containerHeight: parseInt(window.getComputedStyle(container).height),
-        containerWidth: parseInt(window.getComputedStyle(container).width)
+        containerHeight: container.clientHeight - paddings.top - paddings.bottom,
+        containerWidth: container.clientWidth - paddings.left - paddings.right
     };
 
     if (range.containerWidth === 0 || range.containerHeight === 0) {
@@ -157,7 +164,9 @@ function drawCandles(container, ohlcData) {
 
     let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     // set the width and height of the svg element
-    svg.setAttributeNS(null, 'viewBox', '0 0 ' + range.containerWidth + ' ' + range.containerHeight);
+    svg.setAttributeNS(null, 'width', range.containerWidth);
+    svg.setAttributeNS(null, 'height', range.containerHeight);
+    // svg.setAttributeNS(null, 'viewBox', '0 0 ' + range.containerWidth + ' ' + range.containerHeight);
     svg.style.verticalAlign = 'top';
 
     // drawing the vertical grid lines
