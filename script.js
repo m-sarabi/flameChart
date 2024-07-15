@@ -14,6 +14,7 @@ let container;
 class Candle {
     constructor(index, ohlc, range) {
         this.index = index;
+        this.date = ohlc.date;
         this.open = ohlc.open;
         this.high = ohlc.high;
         this.low = ohlc.low;
@@ -68,7 +69,8 @@ class Candle {
 
     // body of the candle as a rectangle svg element
     createCandle() {
-        const sizes = this.calculateSizes();
+        this.sizes = this.calculateSizes();
+        const sizes = this.sizes;
 
         // body of the candle as a rectangle svg element
         this.bodyElement = this.createBody(sizes.x, sizes.y + sizes.upperShadowSize, sizes.width, sizes.bodySize, this.greenCandle ? 'bull' : 'bear');
@@ -95,8 +97,75 @@ class Candle {
         return this.candleGroup;
     }
 
+    createTooltip(parent) {
+        let x = this.sizes.x + this.sizes.width + 5;
+        let y = this.sizes.y + this.sizes.upperShadowSize + this.sizes.bodySize / 2;
+        const tooltip = new Tooltip(x, y);
+
+        const offset = {
+            x: 5,
+            y: 5,
+        };
+        for (let i of ['date', 'open', 'high', 'low', 'close']) {
+            tooltip.createText(`${i}: ${this[i]}`, offset);
+            offset.y += 18;
+        }
+
+        parent.appendChild(tooltip.tooltipGroup);
+
+        this.candleGroup.addEventListener('mouseover', function () {
+            tooltip.tooltipGroup.classList.add('show');
+        });
+        this.candleGroup.addEventListener('mouseout', function () {
+            tooltip.tooltipGroup.classList.remove('show');
+        });
+
+        // set the transform-origin
+        tooltip.tooltipGroup.style.transformOrigin = `${x}px ${y}px`;
+
+        tooltip.fillRect();
+    }
+
     onClick() {
         this.candleGroup.classList.toggle('scale-up');
+    }
+}
+
+class Tooltip {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.tooltipGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.tooltipGroup.classList.add('tooltip');
+        this.rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        this.tooltipGroup.appendChild(this.rect);
+    }
+
+    createText(text, offset) {
+        const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textElement.setAttributeNS(null, 'x', this.x + offset.x);
+        textElement.setAttributeNS(null, 'y', this.y + offset.y);
+        textElement.setAttributeNS(null, 'dominant-baseline', 'hanging');
+        textElement.textContent = text;
+        this.tooltipGroup.appendChild(textElement);
+    }
+
+    fillRect() {
+        setTimeout(() => {
+            let x = this.tooltipGroup.getBBox().x;
+            let y = this.tooltipGroup.getBBox().y;
+            let width = this.tooltipGroup.getBBox().width;
+            let height = this.tooltipGroup.getBBox().height;
+            console.log(x, y, width, height);
+            this.rect.setAttributeNS(null, 'x', x - 5);
+            this.rect.setAttributeNS(null, 'y', y - 5);
+            this.rect.setAttributeNS(null, 'width', width + 10);
+            this.rect.setAttributeNS(null, 'height', height + 10);
+            this.rect.setAttributeNS(null, 'fill', '#ccc');
+            this.rect.setAttributeNS(null, 'opacity', '0.8');
+            this.rect.setAttributeNS(null, 'rx', '10');
+            this.rect.setAttributeNS(null, 'stroke', 'black');
+        }, 50);
     }
 }
 
@@ -146,7 +215,7 @@ function drawCandles(container, ohlcData) {
         right: parseInt(containerStyle.paddingRight),
         bottom: parseInt(containerStyle.paddingBottom),
         left: parseInt(containerStyle.paddingLeft)
-    }
+    };
 
     let range = {
         highestHigh: highestHigh,
@@ -173,8 +242,10 @@ function drawCandles(container, ohlcData) {
     let verticalLines = new VerticalLines(range);
     svg.appendChild(verticalLines.lines());
 
+    const candles = [];
     for (let i = 0; i < ohlcData['date'].length; i++) {
         const ohlc = {
+            'date': ohlcData['date'][i],
             'open': ohlcData['open'][i],
             'high': ohlcData['high'][i],
             'low': ohlcData['low'][i],
@@ -182,6 +253,11 @@ function drawCandles(container, ohlcData) {
         };
         let candle = new Candle(i, ohlc, range);
         svg.appendChild(candle.createCandle());
+        candles.push(candle);
+    }
+
+    for (let candle of candles) {
+        candle.createTooltip(svg);
     }
 
     container.appendChild(svg);
@@ -200,50 +276,7 @@ async function fetchData() {
     }
 }
 
-function injectStyle() {
-    const style = document.createElement('style');
-    style.textContent = `
-g.candle {
-    stroke-width: 1px;
-    transform-origin: center;
-    transition: transform 300ms ease-in-out;
-    cursor: pointer;
-}
-
-line {
-    transition: all 300ms ease-in-out;
-}
-
-.scale-up line {
-    stroke-width: 2px;
-}
-
-rect {
-    transition: all 300ms ease-in-out;
-}
-
-.scale-up rect {
-    stroke-width: 2px;
-}
-
-.scale-up {
-    transform: scale(1.1);
-    transition: all 300ms ease-in-out;
-}
-
-#chart {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    height: 100%;
-    box-sizing: border-box;
-}
-    `;
-    document.head.appendChild(style);
-}
-
 document.addEventListener('DOMContentLoaded', async function () {
-    injectStyle();
     const mainContainer = document.getElementById('flame-chart');
     container = document.createElement('div');
     container.id = 'chart';
