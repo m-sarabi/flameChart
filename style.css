@@ -1,71 +1,13 @@
-g.candle {
-    stroke-width: 1px;
-    transform-origin: center;
-    transition: transform 300ms ease-in-out;
-    cursor: pointer;
-}
-
-line {
-    transition: all 300ms ease-in-out;
-}
-
-.scale-up line {
-    stroke-width: 2px;
-}
-
-rect {
-    transition: all 300ms ease-in-out;
-}
-
-.scale-up rect {
-    stroke-width: 2px;
-}
-
-.scale-up {
-    transform: scale(1.1);
-    transition: all 300ms ease-in-out;
-}
-
-#chart-container {
+#flame-chart {
     text-align: center;
     margin: 20px auto;
     position: relative;
     padding: 36px;
     border: 1px solid black;
-    display: inline-block;
-}
-
-
-#chart-title {
-    font-family: Arial, sans-serif;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-#chart {
-    height: 400px;
-    width: 800px;
-    margin: 0 auto;
-    padding: 10px;
-    border: 1px solid #ccc;
+    display: flex;
+    width:800px;
+    height:400px;
+    flex-direction: column;
     resize: both;
     overflow: hidden;
-}
-
-#x-axis-label, #y-axis-label {
-    font-family: Arial, sans-serif;
-    font-size: 18px;
-    position: absolute;
-}
-
-#x-axis-label {
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-#y-axis-label {
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
 }

@@ -19,7 +19,7 @@ class Candle {
         this.low = ohlc.low;
         this.close = ohlc.close;
         this.range = range;
-        this.greenCandle = this.open > this.close;
+        this.greenCandle = this.open < this.close;
 
         this.scale = this.range.containerHeight / (this.range.highestHigh - this.range.lowestLow);
 
@@ -31,7 +31,7 @@ class Candle {
         let rawWidth = this.range.containerWidth / this.range.length;
         return {
             bodySize: Math.abs(this.open - this.close) * this.scale,
-            candle_size: (this.high - this.low) * this.scale,
+            candleSize: (this.high - this.low) * this.scale,
             upperShadowSize: (this.open > this.close ? this.high - this.open : this.high - this.close) * this.scale,
             lowerShadowSize: (this.open > this.close ? this.close - this.low : this.open - this.low) * this.scale,
             rawWidth: rawWidth,
@@ -96,7 +96,6 @@ class Candle {
     }
 
     onClick() {
-        console.log('Candle clicked');
         this.candleGroup.classList.toggle('scale-up');
     }
 }
@@ -158,8 +157,8 @@ function drawCandles(container, ohlcData) {
 
     let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     // set the width and height of the svg element
-    svg.setAttributeNS(null, 'width', '100%');
-    svg.setAttributeNS(null, 'height', '100%');
+    svg.setAttributeNS(null, 'viewBox', '0 0 ' + range.containerWidth + ' ' + range.containerHeight);
+    svg.style.verticalAlign = 'top';
 
     // drawing the vertical grid lines
     let verticalLines = new VerticalLines(range);
@@ -192,8 +191,94 @@ async function fetchData() {
     }
 }
 
+function injectStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+g.candle {
+    stroke-width: 1px;
+    transform-origin: center;
+    transition: transform 300ms ease-in-out;
+    cursor: pointer;
+}
+
+line {
+    transition: all 300ms ease-in-out;
+}
+
+.scale-up line {
+    stroke-width: 2px;
+}
+
+rect {
+    transition: all 300ms ease-in-out;
+}
+
+.scale-up rect {
+    stroke-width: 2px;
+}
+
+.scale-up {
+    transform: scale(1.1);
+    transition: all 300ms ease-in-out;
+}
+
+#flame-chart {
+    text-align: center;
+    margin: 20px auto;
+    position: relative;
+    padding: 36px;
+    border: 1px solid black;
+    display: flex;
+    width:800px;
+    height:400px;
+    flex-direction: column;
+    resize: both;
+    overflow: hidden;
+}
+
+
+#chart-title {
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#chart {
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+#x-axis-label, #y-axis-label {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    position: absolute;
+}
+
+#x-axis-label {
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#y-axis-label {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+}
+    `;
+    document.head.appendChild(style);
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
-    container = document.getElementById('chart');
+    injectStyle();
+    const mainContainer = document.getElementById('flame-chart');
+    container = document.createElement('div');
+    container.id = 'chart';
+    mainContainer.appendChild(container);
     const title = document.getElementById('chart-title');
 
     try {
