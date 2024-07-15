@@ -100,34 +100,36 @@ class Candle {
     createTooltip(parent) {
         let x = this.sizes.x + this.sizes.width + 5;
         let y = this.sizes.y + this.sizes.upperShadowSize + this.sizes.bodySize / 2;
-        const tooltip = new Tooltip(x, y);
+        this.tooltip = new Tooltip(x, y);
 
         const offset = {
             x: 5,
             y: 5,
         };
         for (let i of ['date', 'open', 'high', 'low', 'close']) {
-            tooltip.createText(`${i}: ${this[i]}`, offset);
+            this.tooltip.createText(`${i}: ${this[i]}`, offset);
             offset.y += 18;
         }
 
-        parent.appendChild(tooltip.tooltipGroup);
+        parent.appendChild(this.tooltip.tooltipGroup);
 
-        this.candleGroup.addEventListener('mouseover', function () {
-            tooltip.tooltipGroup.classList.add('show');
+        this.candleGroup.addEventListener('mouseover', () => {
+            this.tooltip.tooltipGroup.classList.add('show');
         });
-        this.candleGroup.addEventListener('mouseout', function () {
-            tooltip.tooltipGroup.classList.remove('show');
+        this.candleGroup.addEventListener('mouseout', () => {
+            if (this.candleGroup.classList.contains('scale-up')) return;
+            this.tooltip.tooltipGroup.classList.remove('show');
         });
 
         // set the transform-origin
-        tooltip.tooltipGroup.style.transformOrigin = `${x}px ${y}px`;
+        this.tooltip.tooltipGroup.style.transformOrigin = `${x}px ${y}px`;
 
-        tooltip.fillRect();
+        this.tooltip.fillRect();
     }
 
     onClick() {
         this.candleGroup.classList.toggle('scale-up');
+        this.tooltip.tooltipGroup.classList.add('show');
     }
 }
 
@@ -156,7 +158,6 @@ class Tooltip {
             let y = this.tooltipGroup.getBBox().y;
             let width = this.tooltipGroup.getBBox().width;
             let height = this.tooltipGroup.getBBox().height;
-            console.log(x, y, width, height);
             this.rect.setAttributeNS(null, 'x', x - 5);
             this.rect.setAttributeNS(null, 'y', y - 5);
             this.rect.setAttributeNS(null, 'width', width + 10);
