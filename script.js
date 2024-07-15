@@ -226,8 +226,8 @@ rect {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
-    flex-grow: 1;
-    min-height: 0;
+    height: 100%;
+    box-sizing: border-box;
 }
     `;
     document.head.appendChild(style);
