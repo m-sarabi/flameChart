@@ -1,16 +1,3 @@
-const WIDTH_SCALE = 0.75;
-const MIN_SPACING = 24;
-const colors = {
-    bullBody: 'lightgreen',
-    bearBody: 'lightcoral',
-    bullBorder: 'darkgreen',
-    bearBorder: 'darkred',
-    bullShadow: 'darkgreen',
-    bearShadow: 'darkred'
-};
-
-let container;
-
 class Candle {
     constructor(index, ohlc, range) {
         this.index = index;
@@ -207,95 +194,59 @@ class VerticalLines {
     }
 }
 
-function drawCandles(container, ohlcData) {
-    let lowestLow = Math.min(...ohlcData.low);
-    let highestHigh = Math.max(...ohlcData.high);
-    const containerStyle = window.getComputedStyle(container);
-    const paddings = {
-        top: parseInt(containerStyle.paddingTop),
-        right: parseInt(containerStyle.paddingRight),
-        bottom: parseInt(containerStyle.paddingBottom),
-        left: parseInt(containerStyle.paddingLeft)
-    };
-
-    let range = {
-        highestHigh: highestHigh,
-        lowestLow: lowestLow,
-        length: ohlcData['date'].length,
-        containerHeight: container.clientHeight - paddings.top - paddings.bottom,
-        containerWidth: container.clientWidth - paddings.left - paddings.right
-    };
-
-    if (range.containerWidth === 0 || range.containerHeight === 0) {
-        throw new Error("Can't draw the chart in the container with zero width or height, silly!");
+class HorizontalLines {
+    constructor(range, minSpacing = MIN_SPACING) {
+        this.range = range;
+        this.minSpacing = minSpacing;
+        this.horizontalGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     }
 
-    container.innerHTML = '';
+    createLine(x, y) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttributeNS(null, 'x1', '0');
+        line.setAttributeNS(null, 'y1', y);
+        line.setAttributeNS(null, 'x2', x);
+        line.setAttributeNS(null, 'y2', y);
+        line.setAttributeNS(null, 'stroke', 'black');
+        line.setAttributeNS(null, 'opacity', '0.3');
 
-    let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    // set the width and height of the svg element
-    svg.setAttributeNS(null, 'width', range.containerWidth);
-    svg.setAttributeNS(null, 'height', range.containerHeight);
-    // svg.setAttributeNS(null, 'viewBox', '0 0 ' + range.containerWidth + ' ' + range.containerHeight);
-    svg.style.verticalAlign = 'top';
-
-    // drawing the vertical grid lines
-    let verticalLines = new VerticalLines(range);
-    svg.appendChild(verticalLines.lines());
-
-    const candles = [];
-    for (let i = 0; i < ohlcData['date'].length; i++) {
-        const ohlc = {
-            'date': ohlcData['date'][i],
-            'open': ohlcData['open'][i],
-            'high': ohlcData['high'][i],
-            'low': ohlcData['low'][i],
-            'close': ohlcData['close'][i]
-        };
-        let candle = new Candle(i, ohlc, range);
-        svg.appendChild(candle.createCandle());
-        candles.push(candle);
+        return line;
     }
 
-    for (let candle of candles) {
-        candle.createTooltip(svg);
-    }
+    calculateSpacing() {
+        let count = this.range.containerHeight / this.minSpacing;
+        let priceDiff = (this.range.highestHigh - this.range.lowestLow) / count;
+        console.log(priceDiff);
+        let divisor = Math.floor(Math.log10(priceDiff));
+        priceDiff = priceDiff / Math.pow(10, divisor);
+        priceDiff = priceDiff < 1 ? 1 : priceDiff < 2 ? 2 : priceDiff < 5 ? 5 : 10;
+        priceDiff = Math.pow(10, divisor) * priceDiff;
+        console.log(priceDiff);
+        const prices = [Math.ceil(this.range.lowestLow / priceDiff) * priceDiff];
 
-    container.appendChild(svg);
-}
-
-async function fetchData() {
-    try {
-        const response = await fetch('data.json');
-        if (!response.ok) {
-            console.error(`HTTP error! status: ${response.status}`);
+        while (true) {
+            const price = prices[prices.length - 1] + priceDiff;
+            if (price > this.range.highestHigh) {
+                break;
+            }
+            prices.push(prices[prices.length - 1] + priceDiff);
         }
-        return await response.json();
-    } catch (error) {
-        console.error("Failed to fetch data:", error);
-        throw error;
+        console.log(prices);
+        return prices.map((price) => {
+            return Math.round(this.range.containerHeight
+                - this.range.containerHeight
+                * (price - this.range.lowestLow)
+                / (this.range.highestHigh - this.range.lowestLow));
+        });
+    }
+
+    lines() {
+        const yArr = this.calculateSpacing();
+        for (let i = 0; i < yArr.length; i++) {
+            let line = this.createLine(this.range.containerWidth, yArr[i]);
+            this.horizontalGroup.appendChild(line);
+        }
+
+        return this.horizontalGroup;
     }
 }
-
-document.addEventListener('DOMContentLoaded', async function () {
-    const mainContainer = document.getElementById('flame-chart');
-    container = document.createElement('div');
-    container.id = 'chart';
-    mainContainer.appendChild(container);
-
-    try {
-        const ohlcData = await fetchData();
-
-        drawCandles(container, ohlcData);
-
-        window.addEventListener('resize', function () {
-            drawCandles(container, ohlcData);
-        });
-
-        new ResizeObserver(() => {
-            drawCandles(container, ohlcData);
-        }).observe(container);
-    } catch (error) {
-        console.error("Failed to draw the chart:", error);
-    }
-});
