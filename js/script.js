@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     container.id = 'chart';
     mainContainer.appendChild(container);
     try {
-        const ohlcData = await fetchData();
+        const randomData = new RandomData(0.5, 100, 100);
+        const ohlcData = randomData.generate();
 
         drawCandles(container, ohlcData);
 
@@ -105,4 +106,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (error) {
         console.error("Failed to draw the chart:", error);
     }
+
+    document.getElementById("random-data").addEventListener("click", function () {
+        const randomData = new RandomData(0.5, 100, 100);
+        const ohlcData = randomData.generate();
+        drawCandles(container, ohlcData);
+    });
 });
