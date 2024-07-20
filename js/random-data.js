@@ -3,14 +3,14 @@ class RandomData {
         this.magnitude = magnitude;
         this.length = length;
         this.initialPrice = initialPrice;
+    }
+
+    generate() {
         this.date = [];
         this.open = [];
         this.high = [];
         this.low = [];
         this.close = [];
-    }
-
-    generate() {
         let price = this.initialPrice;
         for (let i = 0; i < this.length; i++) {
             this.date.push(i);

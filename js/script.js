@@ -90,10 +90,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     container = document.createElement('div');
     container.id = 'chart';
     mainContainer.appendChild(container);
+    const randomData = new RandomData(0.5, 100, 100);
+    let ohlcData = randomData.generate();
     try {
-        const randomData = new RandomData(0.5, 100, 100);
-        const ohlcData = randomData.generate();
-
         drawCandles(container, ohlcData);
 
         window.addEventListener('resize', function () {
@@ -108,8 +107,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     document.getElementById("random-data").addEventListener("click", function () {
-        const randomData = new RandomData(0.5, 100, 100);
-        const ohlcData = randomData.generate();
+        // const randomData = new RandomData(0.5, 100, 100);
+        ohlcData = randomData.generate();
         drawCandles(container, ohlcData);
     });
 });
