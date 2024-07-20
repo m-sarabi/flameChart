@@ -216,12 +216,10 @@ class HorizontalLines {
     calculateSpacing() {
         let count = this.range.containerHeight / this.minSpacing;
         let priceDiff = (this.range.highestHigh - this.range.lowestLow) / count;
-        console.log(priceDiff);
         let divisor = Math.floor(Math.log10(priceDiff));
         priceDiff = priceDiff / Math.pow(10, divisor);
         priceDiff = priceDiff < 1 ? 1 : priceDiff < 2 ? 2 : priceDiff < 5 ? 5 : 10;
         priceDiff = Math.pow(10, divisor) * priceDiff;
-        console.log(priceDiff);
         const prices = [Math.ceil(this.range.lowestLow / priceDiff) * priceDiff];
 
         while (true) {
@@ -231,7 +229,6 @@ class HorizontalLines {
             }
             prices.push(prices[prices.length - 1] + priceDiff);
         }
-        console.log(prices);
         return prices.map((price) => {
             return Math.round(this.range.containerHeight
                 - this.range.containerHeight
