@@ -143,10 +143,10 @@ class Tooltip {
             this.createText(`${i}: ${this.ohlc[i]}`, offset);
             offset.y += 18;
         }
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             this.fixTooltipPosition();
             this.fillRect();
-        }, 100);
+        });
     }
 
     createText(text, offset) {
