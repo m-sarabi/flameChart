@@ -124,9 +124,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (event.target.id === 'candle-count') {
             randomData.length = parseInt(event.target.value);
         } else if (event.target.id === 'magnitude') {
-            randomData.magnitude = parseInt(event.target.value);
+            randomData.magnitude = parseFloat(event.target.value);
         } else if (event.target.id === 'initial-price') {
-            randomData.initialPrice = parseInt(event.target.value);
+            randomData.initialPrice = parseFloat(event.target.value);
         }
         if (randomData.length > 1 && randomData.magnitude > 0 && randomData.initialPrice > 0) {
             ohlcData = randomData.generate();
