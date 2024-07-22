@@ -72,6 +72,14 @@ function drawCandles(container, ohlcData, labels = true) {
     }
 
     container.appendChild(svg);
+    svg.addEventListener('click', function (event) {
+        if (event.target === this) {
+            for (let candle of candles) {
+                candle.candleGroup.classList.remove('scale-up');
+                candle.tooltip.tooltipGroup.classList.remove('show');
+            }
+        }
+    });
 }
 
 async function fetchData() {
@@ -132,6 +140,5 @@ document.addEventListener('DOMContentLoaded', async function () {
             ohlcData = randomData.generate();
             drawCandles(container, ohlcData);
         }
-
     });
 });
