@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     container.style.position = 'relative';
     mainContainer.appendChild(container);
 
-    const randomData = new RandomData(0.01, 73, 5);
+    const randomData = new RandomData(5, 100, 100);
     let ohlcData = randomData.generate();
     try {
         drawCandles(container, ohlcData);
