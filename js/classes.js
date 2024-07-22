@@ -1,6 +1,7 @@
 class Candle {
     constructor(index, ohlc, range, labels = true) {
         this.index = index;
+        this.ohlc = ohlc;
         this.date = ohlc.date;
         this.open = ohlc.open;
         this.high = ohlc.high;
@@ -88,16 +89,17 @@ class Candle {
     createTooltip(parent) {
         let x = this.sizes.x + this.sizes.width + 5;
         let y = this.sizes.y + this.sizes.upperShadowSize + this.sizes.bodySize / 2;
-        this.tooltip = new Tooltip(x, y);
+        this.tooltip = new Tooltip(x, y, this.ohlc, this.range);
 
-        const offset = {
-            x: 5,
-            y: 5,
-        };
-        for (let i of ['date', 'open', 'high', 'low', 'close']) {
-            this.tooltip.createText(`${i}: ${this[i]}`, offset);
-            offset.y += 18;
-        }
+        // const offset = {
+        //     x: 5,
+        //     y: 5,
+        // };
+        // for (let i of ['date', 'open', 'high', 'low', 'close']) {
+        //     this.tooltip.createText(`${i}: ${this[i]}`, offset);
+        //     offset.y += 18;
+        // }
+        this.tooltip.createTooltip();
 
         parent.appendChild(this.tooltip.tooltipGroup);
 
@@ -111,8 +113,6 @@ class Candle {
 
         // set the transform-origin
         this.tooltip.tooltipGroup.style.transformOrigin = `${x}px ${y}px`;
-
-        this.tooltip.fillRect();
     }
 
     onClick() {
@@ -122,13 +122,31 @@ class Candle {
 }
 
 class Tooltip {
-    constructor(x, y) {
+    constructor(x, y, ohlc, range) {
         this.x = x;
         this.y = y;
+        this.ohlc = ohlc;
+        this.range = range;
         this.tooltipGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         this.tooltipGroup.classList.add('tooltip');
+        this.tooltipGroup.style.pointerEvents = 'none';
         this.rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         this.tooltipGroup.appendChild(this.rect);
+    }
+
+    createTooltip() {
+        let offset = {
+            x: 5,
+            y: 5,
+        };
+        for (let i in this.ohlc) {
+            this.createText(`${i}: ${this.ohlc[i]}`, offset);
+            offset.y += 18;
+        }
+        setTimeout(() => {
+            this.fixTooltipPosition();
+            this.fillRect();
+        }, 100);
     }
 
     createText(text, offset) {
@@ -140,21 +158,33 @@ class Tooltip {
         this.tooltipGroup.appendChild(textElement);
     }
 
+    fixTooltipPosition() {
+        let x = Math.min(this.x, this.range.containerWidth - this.tooltipGroup.getBBox().width - 10);
+        let y = Math.min(this.y, this.range.containerHeight - this.tooltipGroup.getBBox().height - 10);
+        let offset = {
+            x: 5,
+            y: 5,
+        };
+        this.tooltipGroup.querySelectorAll('text').forEach(text => {
+            text.setAttributeNS(null, 'x', (x + offset.x).toString());
+            text.setAttributeNS(null, 'y', (y + offset.y).toString());
+            offset.y += 18;
+        })
+    }
+
     fillRect() {
-        setTimeout(() => {
-            let x = this.tooltipGroup.getBBox().x;
-            let y = this.tooltipGroup.getBBox().y;
-            let width = this.tooltipGroup.getBBox().width;
-            let height = this.tooltipGroup.getBBox().height;
-            this.rect.setAttributeNS(null, 'x', (x - 5).toString());
-            this.rect.setAttributeNS(null, 'y', (y - 5).toString());
-            this.rect.setAttributeNS(null, 'width', (width + 10).toString());
-            this.rect.setAttributeNS(null, 'height', (height + 10).toString());
-            this.rect.setAttributeNS(null, 'fill', '#ccc');
-            this.rect.setAttributeNS(null, 'opacity', '0.8');
-            this.rect.setAttributeNS(null, 'rx', '10');
-            this.rect.setAttributeNS(null, 'stroke', 'black');
-        }, 50);
+        let x = this.tooltipGroup.getBBox().x;
+        let y = this.tooltipGroup.getBBox().y;
+        let width = this.tooltipGroup.getBBox().width;
+        let height = this.tooltipGroup.getBBox().height;
+        this.rect.setAttributeNS(null, 'x', (x - 5).toString());
+        this.rect.setAttributeNS(null, 'y', (y - 5).toString());
+        this.rect.setAttributeNS(null, 'width', (width + 10).toString());
+        this.rect.setAttributeNS(null, 'height', (height + 10).toString());
+        this.rect.setAttributeNS(null, 'fill', '#ccc');
+        this.rect.setAttributeNS(null, 'opacity', '0.8');
+        this.rect.setAttributeNS(null, 'rx', '10');
+        this.rect.setAttributeNS(null, 'stroke', 'black');
     }
 }
 
@@ -240,7 +270,6 @@ class HorizontalLines {
         let count = (this.range.containerHeight - (this.labels ? DATE_WIDTH : 0)) / this.minSpacing;
         let priceDiff = (this.range.highestHigh - this.range.lowestLow) / count;
         let divisor = Math.floor(Math.log10(priceDiff));
-        console.log(divisor);
         priceDiff = priceDiff / Math.pow(10, divisor);
         priceDiff = priceDiff < 1 ? 1 : priceDiff < 2 ? 2 : priceDiff < 5 ? 5 : 10;
         priceDiff = Math.pow(10, divisor) * priceDiff;
