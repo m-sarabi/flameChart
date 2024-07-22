@@ -13,7 +13,13 @@
 
 <div id="flame-chart">
 </div>
-<button id="random-data" style="display: block; margin: 20px auto">Random Data</button>
+<div id="random-data-input">
+    <label for="candle-count">Candles</label><input id="candle-count" type="range" min="1" max="200" value="100">
+    <label for="magnitude">Magnitude</label><input id="magnitude" type="number" value="5" min="0.001">
+    <label for="initial-price">Initial Price</label><input id="initial-price" type="number" value="100" min="0">
+    <button id="random-data" type="button">Random Data</button>
+</div>
+
 
 <script src="js/script.js"></script>
 <script src="js/classes.js"></script>

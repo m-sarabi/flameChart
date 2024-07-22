@@ -1,5 +1,5 @@
 class Candle {
-    constructor(index, ohlc, range) {
+    constructor(index, ohlc, range, labels = true) {
         this.index = index;
         this.date = ohlc.date;
         this.open = ohlc.open;
@@ -7,16 +7,17 @@ class Candle {
         this.low = ohlc.low;
         this.close = ohlc.close;
         this.range = range;
+        this.labels = labels;
         this.greenCandle = this.open < this.close;
 
-        this.scale = this.range.containerHeight / (this.range.highestHigh - this.range.lowestLow);
+        this.scale = (this.range.containerHeight - (this.labels ? DATE_WIDTH : 0)) / (this.range.highestHigh - this.range.lowestLow);
 
         this.candleGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         this.candleGroup.classList.add('candle');
     }
 
     calculateSizes() {
-        let rawWidth = this.range.containerWidth / this.range.length;
+        let rawWidth = (this.range.containerWidth - (this.labels ? PRICE_WIDTH : 0)) / this.range.length;
         return {
             bodySize: Math.abs(this.open - this.close) * this.scale,
             candleSize: (this.high - this.low) * this.scale,
@@ -24,7 +25,7 @@ class Candle {
             lowerShadowSize: (this.open > this.close ? this.close - this.low : this.open - this.low) * this.scale,
             rawWidth: rawWidth,
             width: rawWidth * WIDTH_SCALE,
-            x: rawWidth * (this.index + (1 - WIDTH_SCALE) / 2),
+            x: rawWidth * (this.index + (1 - WIDTH_SCALE) / 2) + (this.labels ? PRICE_WIDTH : 0),
             y: (this.range.highestHigh - this.high) * this.scale,
         };
     }
@@ -145,10 +146,10 @@ class Tooltip {
             let y = this.tooltipGroup.getBBox().y;
             let width = this.tooltipGroup.getBBox().width;
             let height = this.tooltipGroup.getBBox().height;
-            this.rect.setAttributeNS(null, 'x', x - 5);
-            this.rect.setAttributeNS(null, 'y', y - 5);
-            this.rect.setAttributeNS(null, 'width', width + 10);
-            this.rect.setAttributeNS(null, 'height', height + 10);
+            this.rect.setAttributeNS(null, 'x', (x - 5).toString());
+            this.rect.setAttributeNS(null, 'y', (y - 5).toString());
+            this.rect.setAttributeNS(null, 'width', (width + 10).toString());
+            this.rect.setAttributeNS(null, 'height', (height + 10).toString());
             this.rect.setAttributeNS(null, 'fill', '#ccc');
             this.rect.setAttributeNS(null, 'opacity', '0.8');
             this.rect.setAttributeNS(null, 'rx', '10');
@@ -158,9 +159,11 @@ class Tooltip {
 }
 
 class VerticalLines {
-    constructor(range, minSpacing = MIN_SPACING) {
+    constructor(range, ohlc, minSpacing = MIN_SPACING, labels = true) {
         this.range = range;
+        this.ohlc = ohlc;
         this.minSpacing = minSpacing;
+        this.labels = labels;
         this.verticalGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     }
 
@@ -178,32 +181,52 @@ class VerticalLines {
 
     lines() {
         let spacing = 1;
-        let rawWidth = this.range.containerWidth / this.range.length;
+        let rawWidth = (this.range.containerWidth - (this.labels ? PRICE_WIDTH : 0)) / this.range.length;
         while (rawWidth * spacing < this.minSpacing) {
             spacing++;
         }
-        let x = rawWidth / 2;
-        let y = this.range.containerHeight;
+        let x = rawWidth / 2 + (this.labels ? PRICE_WIDTH : 0);
+        const x0 = x;
+        let y = this.range.containerHeight - (this.labels ? DATE_WIDTH : 0);
         while (x < this.range.containerWidth) {
             let line = this.createLine(x, y);
             this.verticalGroup.appendChild(line);
+            if (this.labels) {
+                let label = this.createLabels(x, y + 20, this.ohlc['date'][Math.round((x - x0) / (rawWidth))]);
+                this.verticalGroup.appendChild(label);
+            }
             x += rawWidth * spacing;
         }
 
         return this.verticalGroup;
     }
+
+    createLabels(x, y, text) {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttributeNS(null, 'x', x);
+        label.setAttributeNS(null, 'y', y);
+        label.setAttributeNS(null, "font-size", "14px");
+        label.setAttributeNS(null, "fill", "black");
+        // label.setAttributeNS(null, "text-anchor", "start");
+        label.setAttributeNS(null, 'text-anchor', 'middle');
+        label.textContent = text;
+
+        return label;
+    }
 }
 
 class HorizontalLines {
-    constructor(range, minSpacing = MIN_SPACING) {
+    constructor(range, minSpacing = MIN_SPACING, labels = true) {
         this.range = range;
         this.minSpacing = minSpacing;
+        this.labels = labels;
         this.horizontalGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.prices = [];
     }
 
     createLine(x, y) {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttributeNS(null, 'x1', '0');
+        line.setAttributeNS(null, 'x1', (this.labels ? PRICE_WIDTH : 0).toString());
         line.setAttributeNS(null, 'y1', y);
         line.setAttributeNS(null, 'x2', x);
         line.setAttributeNS(null, 'y2', y);
@@ -214,24 +237,27 @@ class HorizontalLines {
     }
 
     calculateSpacing() {
-        let count = this.range.containerHeight / this.minSpacing;
+        let count = (this.range.containerHeight - (this.labels ? DATE_WIDTH : 0)) / this.minSpacing;
         let priceDiff = (this.range.highestHigh - this.range.lowestLow) / count;
         let divisor = Math.floor(Math.log10(priceDiff));
+        console.log(divisor);
         priceDiff = priceDiff / Math.pow(10, divisor);
         priceDiff = priceDiff < 1 ? 1 : priceDiff < 2 ? 2 : priceDiff < 5 ? 5 : 10;
         priceDiff = Math.pow(10, divisor) * priceDiff;
-        const prices = [Math.ceil(this.range.lowestLow / priceDiff) * priceDiff];
+        this.prices.push(Math.ceil(this.range.lowestLow / priceDiff) * priceDiff);
 
         while (true) {
-            const price = prices[prices.length - 1] + priceDiff;
+            const price = this.prices[this.prices.length - 1] + priceDiff;
             if (price > this.range.highestHigh) {
                 break;
             }
-            prices.push(prices[prices.length - 1] + priceDiff);
+            this.prices.push(this.prices[this.prices.length - 1] + priceDiff);
         }
-        return prices.map((price) => {
-            return Math.round(this.range.containerHeight
-                - this.range.containerHeight
+        this.prices = this.prices.map((price) => Math.round(price * (10 ** (-divisor))) / (10 ** (-divisor)));
+        return this.prices.map((price) => {
+            const height = this.range.containerHeight - (this.labels ? DATE_WIDTH : 0);
+            return Math.round(height
+                - height
                 * (price - this.range.lowestLow)
                 / (this.range.highestHigh - this.range.lowestLow));
         });
@@ -242,8 +268,24 @@ class HorizontalLines {
         for (let i = 0; i < yArr.length; i++) {
             let line = this.createLine(this.range.containerWidth, yArr[i]);
             this.horizontalGroup.appendChild(line);
+            if (this.labels) {
+                const label = this.createLabel(PRICE_WIDTH - 5, yArr[i] + 5, this.prices[i].toString());
+                this.horizontalGroup.appendChild(label);
+            }
         }
 
         return this.horizontalGroup;
+    }
+
+    createLabel(x, y, text) {
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttributeNS(null, "x", x);
+        label.setAttributeNS(null, "y", y);
+        label.setAttributeNS(null, "font-size", "14px");
+        label.setAttributeNS(null, "fill", "black");
+        label.setAttributeNS(null, "text-anchor", "end");
+        label.innerHTML = text;
+
+        return label;
     }
 }
