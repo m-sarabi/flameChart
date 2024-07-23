@@ -22,10 +22,10 @@ class RandomData {
             this.open.push(price);
             this.close.push(Math.round((price + gaussianRandom(0, this.magnitude)) * (10 ** digits)) / (10 ** digits));
             this.high.push(Math.round(Math.max(
-                    price, this.close[i], Math.max(price, this.close[i]) + gaussianRandom(this.magnitude / 2, this.magnitude / 2))
+                    price, this.close[i], Math.max(price, this.close[i]) + gaussianRandom(this.magnitude / 3, this.magnitude / 3))
                 * (10 ** digits)) / (10 ** digits));
             this.low.push(Math.round(Math.min(
-                    price, this.close[i], Math.min(price, this.close[i]) - gaussianRandom(this.magnitude / 2, this.magnitude / 2))
+                    price, this.close[i], Math.min(price, this.close[i]) - gaussianRandom(this.magnitude / 3, this.magnitude / 3))
                 * (10 ** digits)) / (10 ** digits));
             price = Math.round((this.close[i] + gaussianRandom(0, this.magnitude / 100)) * (10 ** digits)) / (10 ** digits);
         }
