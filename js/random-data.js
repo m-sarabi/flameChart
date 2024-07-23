@@ -14,8 +14,11 @@ class RandomData {
         let price = this.initialPrice;
         let digits = -Math.floor(Math.log10(this.magnitude)) + 2;
         digits = digits < 0 ? 0 : digits;
+        let date = new Date();
         for (let i = 0; i < this.length; i++) {
-            this.date.push(i);
+            // this.date.push(i);
+            this.date.push(date.toISOString().slice(0, 10));
+            date.setDate(date.getDate() + 1);
             this.open.push(price);
             this.close.push(Math.round((price + gaussianRandom(0, this.magnitude)) * (10 ** digits)) / (10 ** digits));
             this.high.push(Math.round(Math.max(

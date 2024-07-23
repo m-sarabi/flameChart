@@ -221,7 +221,7 @@ class VerticalLines {
         while (x < this.range.containerWidth) {
             let line = this.createLine(x, y);
             this.verticalGroup.appendChild(line);
-            if (this.labels) {
+            if (this.labels && x + rawWidth * spacing < this.range.containerWidth) {
                 let label = this.createLabels(x, y + 20, this.ohlc['date'][Math.round((x - x0) / (rawWidth))]);
                 this.verticalGroup.appendChild(label);
             }
@@ -240,6 +240,8 @@ class VerticalLines {
         // label.setAttributeNS(null, "text-anchor", "start");
         label.setAttributeNS(null, 'text-anchor', 'middle');
         label.textContent = text;
+        // rotate the label 45 degrees
+        label.setAttributeNS(null, 'transform', 'translate(15 15) rotate(45 ' + x + ' ' + y + ')');
 
         return label;
     }

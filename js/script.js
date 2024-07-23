@@ -1,7 +1,7 @@
 const WIDTH_SCALE = 0.75;
-const MIN_SPACING = 24;
+const MIN_SPACING = 30;
 const PRICE_WIDTH = 60;
-const DATE_WIDTH = 40;
+const DATE_WIDTH = 60;
 const colors = {
     bullBody: 'lightgreen',
     bearBody: 'lightcoral',
@@ -44,6 +44,7 @@ function drawCandles(container, ohlcData, labels = true) {
     svg.setAttributeNS(null, 'height', range.containerHeight.toString());
     // svg.setAttributeNS(null, 'viewBox', '0 0 ' + range.containerWidth + ' ' + range.containerHeight);
     svg.style.verticalAlign = 'top';
+    svg.style.overflow = 'visible';
 
     // drawing the vertical grid lines
     let verticalLines = new VerticalLines(range, ohlcData, MIN_SPACING, labels);
