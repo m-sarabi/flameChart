@@ -12,15 +12,19 @@ class RandomData {
         this.low = [];
         this.close = [];
         let price = this.initialPrice;
+        let digits = -Math.floor(Math.log10(this.magnitude)) + 2;
+        digits = digits < 0 ? 0 : digits;
         for (let i = 0; i < this.length; i++) {
             this.date.push(i);
             this.open.push(price);
-            this.close.push(price + gaussianRandom(0, this.magnitude));
-            this.high.push(Math.max(price, this.close[i],
-                Math.max(price, this.close[i]) + gaussianRandom(this.magnitude / 4, this.magnitude / 4)));
-            this.low.push(Math.min(price, this.close[i],
-                Math.min(price, this.close[i]) - gaussianRandom(this.magnitude / 4, this.magnitude / 4)));
-            price = this.close[i] + gaussianRandom(0, this.magnitude / 100);
+            this.close.push(Math.round((price + gaussianRandom(0, this.magnitude)) * (10 ** digits)) / (10 ** digits));
+            this.high.push(Math.round(Math.max(
+                    price, this.close[i], Math.max(price, this.close[i]) + gaussianRandom(this.magnitude / 4, this.magnitude / 4))
+                * (10 ** digits)) / (10 ** digits));
+            this.low.push(Math.round(Math.min(
+                    price, this.close[i], Math.min(price, this.close[i]) + gaussianRandom(this.magnitude / 4, this.magnitude / 4))
+                * (10 ** digits)) / (10 ** digits));
+            price = Math.round((this.close[i] + gaussianRandom(0, this.magnitude / 100)) * (10 ** digits)) / (10 ** digits);
         }
 
         return {date: this.date, open: this.open, high: this.high, low: this.low, close: this.close};
