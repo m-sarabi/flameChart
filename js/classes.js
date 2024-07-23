@@ -80,9 +80,12 @@ class Candle {
         // find a better solution so that candles don't go off-screen
         this.candleGroup.style.transformOrigin = `${sizes.width / 2 + sizes.x}px ${sizes.y + sizes.upperShadowSize + sizes.bodySize / 2}px`;
 
-        this.candleGroup.appendChild(this.bodyElement);
-        this.candleGroup.appendChild(this.upperShadowElement);
-        this.candleGroup.appendChild(this.lowerShadowElement);
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(this.bodyElement);
+        fragment.appendChild(this.upperShadowElement);
+        fragment.appendChild(this.lowerShadowElement);
+        this.candleGroup.appendChild(fragment);
+
         return this.candleGroup;
     }
 
@@ -91,14 +94,6 @@ class Candle {
         let y = this.sizes.y + this.sizes.upperShadowSize + this.sizes.bodySize / 2;
         this.tooltip = new Tooltip(x, y, this.ohlc, this.range);
 
-        // const offset = {
-        //     x: 5,
-        //     y: 5,
-        // };
-        // for (let i of ['date', 'open', 'high', 'low', 'close']) {
-        //     this.tooltip.createText(`${i}: ${this[i]}`, offset);
-        //     offset.y += 18;
-        // }
         this.tooltip.createTooltip();
 
         parent.appendChild(this.tooltip.tooltipGroup);
@@ -139,10 +134,13 @@ class Tooltip {
             x: 5,
             y: 5,
         };
+        const fragment = document.createDocumentFragment();
         for (let i in this.ohlc) {
-            this.createText(`${i}: ${this.ohlc[i]}`, offset);
+            fragment.appendChild(this.createText(`${i}: ${this.ohlc[i]}`, offset));
             offset.y += 18;
         }
+        this.tooltipGroup.appendChild(fragment);
+
         requestAnimationFrame(() => {
             this.fixTooltipPosition();
             this.fillRect();
@@ -155,7 +153,7 @@ class Tooltip {
         textElement.setAttributeNS(null, 'y', this.y + offset.y);
         textElement.setAttributeNS(null, 'dominant-baseline', 'hanging');
         textElement.textContent = text;
-        this.tooltipGroup.appendChild(textElement);
+        return textElement;
     }
 
     fixTooltipPosition() {
@@ -169,18 +167,15 @@ class Tooltip {
             text.setAttributeNS(null, 'x', (x + offset.x).toString());
             text.setAttributeNS(null, 'y', (y + offset.y).toString());
             offset.y += 18;
-        })
+        });
     }
 
     fillRect() {
-        let x = this.tooltipGroup.getBBox().x;
-        let y = this.tooltipGroup.getBBox().y;
-        let width = this.tooltipGroup.getBBox().width;
-        let height = this.tooltipGroup.getBBox().height;
-        this.rect.setAttributeNS(null, 'x', (x - 5).toString());
-        this.rect.setAttributeNS(null, 'y', (y - 5).toString());
-        this.rect.setAttributeNS(null, 'width', (width + 10).toString());
-        this.rect.setAttributeNS(null, 'height', (height + 10).toString());
+        let bbox = this.tooltipGroup.getBBox();
+        this.rect.setAttributeNS(null, 'x', (bbox.x - 5).toString());
+        this.rect.setAttributeNS(null, 'y', (bbox.y - 5).toString());
+        this.rect.setAttributeNS(null, 'width', (bbox.width + 10).toString());
+        this.rect.setAttributeNS(null, 'height', (bbox.height + 10).toString());
         this.rect.setAttributeNS(null, 'fill', '#ccc');
         this.rect.setAttributeNS(null, 'opacity', '0.8');
         this.rect.setAttributeNS(null, 'rx', '10');
